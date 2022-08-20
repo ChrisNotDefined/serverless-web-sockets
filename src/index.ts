@@ -1,3 +1,6 @@
+import dotenv from 'dotenv-safe';
 import greet from './greet';
 
-greet('Master');
+dotenv.config();
+
+greet(process.env.OWNER_NAME ?? '');
