@@ -28,6 +28,7 @@ module.exports = {
     // Disable forcing extension specifications in import paths
     'import/extensions': 'off',
     'import/no-named-as-default-member': 'off',
+    'import/no-extraneous-dependencies': 'error',
     // Leave warnings when using console api
     'no-console': 'warn',
     // Force import ordering
