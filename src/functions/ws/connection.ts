@@ -3,29 +3,26 @@ import {
   APIGatewayProxyCallbackV2,
   APIGatewayProxyWebsocketEventV2,
 } from 'aws-lambda';
-import AWS from 'aws-sdk';
-import { PromiseResult } from 'aws-sdk/lib/request';
 import { successfullReponse } from '@src/util/lambdaResponses';
-
-const dynClient = new AWS.DynamoDB.DocumentClient();
+import { addConnection, deleteConnection } from '@src/connections/dynamoClient';
+import { sendWSConnected } from '@src/connections/wsSender';
 
 export const handler = (
   event: APIGatewayProxyWebsocketEventV2,
   context: APIGatewayEventWebsocketRequestContextV2,
   callback: APIGatewayProxyCallbackV2
 ) => {
-  console.log(event);
-
   const requestEventType = event.requestContext.eventType;
+  console.log(requestEventType);
 
   if (requestEventType === 'CONNECT') {
     // Handle connection
     addConnection(event.requestContext.connectionId)
       .then(() => {
+        onConnected(event);
         callback(null, successfullReponse);
       })
       .catch((err) => {
-        console.log(err);
         callback(null, JSON.stringify(err));
       });
   } else if (requestEventType === 'DISCONNECT') {
@@ -44,32 +41,7 @@ export const handler = (
   }
 };
 
-const addConnection = async (
-  connectionID: string
-): Promise<PromiseResult<AWS.DynamoDB.DocumentClient.PutItemOutput, AWS.AWSError>> => {
-  const chatIDTable = 'chatIdTable';
-
-  const params: AWS.DynamoDB.DocumentClient.PutItemInput = {
-    TableName: chatIDTable,
-    Item: {
-      connectionId: connectionID,
-    },
-  };
-
-  return dynClient.put(params).promise();
-};
-
-const deleteConnection = async (
-  connectionID: string
-): Promise<PromiseResult<AWS.DynamoDB.DocumentClient.DeleteItemOutput, AWS.AWSError>> => {
-  const chatIDTable = 'chatIdTable';
-
-  const params: AWS.DynamoDB.DocumentClient.DeleteItemInput = {
-    TableName: chatIDTable,
-    Key: {
-      connectionId: connectionID,
-    },
-  };
-
-  return dynClient.delete(params).promise();
+const onConnected = (event: APIGatewayProxyWebsocketEventV2) => {
+  console.log('sendOnConnected');
+  sendWSConnected(event);
 };

@@ -1,7 +1,7 @@
 import { APIGatewayProxyWebsocketEventV2 } from 'aws-lambda';
 import { AWSError, DynamoDB } from 'aws-sdk';
 import { PromiseResult } from 'aws-sdk/lib/request';
-import { sendWSMesssage } from './wsSender';
+import { sendWSMessage } from './wsSender';
 
 const dynClient = new DynamoDB.DocumentClient();
 const CHAT_ID_TABLE = 'chatIdTable';
@@ -46,7 +46,7 @@ export const deleteConnection = async (
 export const sendMessageToAllConnected = async (event: APIGatewayProxyWebsocketEventV2) => {
   return getConnectionIds().then((connectionData) => {
     return connectionData.Items?.map((connectionId) => {
-      return sendWSMesssage(event, connectionId.connectionId);
+      return sendWSMessage(event, connectionId.connectionId);
     });
   });
 };
