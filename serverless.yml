@@ -2,7 +2,7 @@ service: FirstServerlessProject
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   region: us-west-2
 
   iamRoleStatements:
@@ -62,8 +62,13 @@ functions:
           route: sendMessage
 
 plugins:
-  - serverless-plugin-typescript
+  - serverless-webpack
   - serverless-offline
+
+custom:
+  webpack:
+  webpackConfig: ./webpack.config.js
+  includeModules: true
 
 resources:
   Resources:
