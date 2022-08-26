@@ -1,5 +1,5 @@
 const slsw = require('serverless-webpack');
-const nodeExternals = require('webpack-node-externals');
+// const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const path = require('path');
 
@@ -10,9 +10,9 @@ module.exports = {
   mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
   entry: slsw.lib.entries,
   devtool: slsw.lib.webpack.isLocal ? false : 'source-map',
-  externals: [nodeExternals()],
+  externals: ['aws-sdk'],
   resolve: {
-    extensions: ['.mjs', '.json', '.ts'],
+    extensions: ['.mjs', '.json', '.ts', '...'],
     symlinks: false,
     cacheWithContext: false,
     alias: {

@@ -10,7 +10,7 @@ export const successfullReponse: APIGatewayProxyResultV2 = {
   body: 'Request completed sucessfully',
 };
 
-export const buildErrorRespone = (error: Error, msg: string): APIGatewayProxyResultV2 => {
+export const buildErrorResponse = (error: Error, msg: string): APIGatewayProxyResultV2 => {
   const errorBody: ErrorBody = {
     error: error.message,
     message: msg,

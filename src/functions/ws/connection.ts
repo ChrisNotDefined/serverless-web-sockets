@@ -5,7 +5,7 @@ import {
   APIGatewayProxyWebsocketEventV2,
 } from 'aws-lambda';
 import * as log from 'lambda-log';
-import { buildErrorRespone, successfullReponse } from '@src/util/lambdaResponses';
+import { buildErrorResponse, successfullReponse } from '@src/util/lambdaResponses';
 import { addConnection, deleteConnection } from '@src/connections/dynamoClient';
 import { sendWSConnected } from '@src/connections/wsSender';
 
@@ -32,11 +32,13 @@ const onConnected = async (event: APIGatewayProxyWebsocketEventV2): Promise<APIG
   try {
     log.debug('@@@ OnConnected');
     await addConnection(event.requestContext.connectionId);
-    await sendWSConnected(event);
+    // You cant send messages before the connection endpoint has responded
+    // TODO: Implement Dynamo Event or SQS Execution Queue
+    // await sendWSConnected(event);
     return successfullReponse;
   } catch (error) {
     log.error(error as Error, { msg: '@ Connect error' });
-    return buildErrorRespone(error as Error, 'Failed to connect to server');
+    return buildErrorResponse(error as Error, 'Failed to connect to server');
   }
 };
 
@@ -47,7 +49,7 @@ const onDisconnected = async (event: APIGatewayProxyWebsocketEventV2): Promise<A
     await deleteConnection(connectionId);
     return successfullReponse;
   } catch (error) {
-    log.error('@ Disconnect error');
-    return buildErrorRespone(error as Error, 'Error when failing to disconnect to server');
+    log.error(error as Error, { msg: '@ Disconnect error' });
+    return buildErrorResponse(error as Error, 'Error when failing to disconnect to server');
   }
 };

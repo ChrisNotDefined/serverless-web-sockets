@@ -1,4 +1,5 @@
 import { APIGatewayEventWebsocketRequestContextV2, APIGatewayProxyWebsocketEventV2 } from 'aws-lambda';
+import * as log from 'lambda-log';
 import { ApiGatewayManagementApi } from 'aws-sdk';
 import { PostToConnectionRequest } from 'aws-sdk/clients/apigatewaymanagementapi';
 
@@ -12,6 +13,7 @@ interface MessageData {
   data?: Record<string, unknown>;
 }
 
+// TODO: Memoize function to return the same instance
 const buildManagementApi = (requestContext: APIGatewayEventWebsocketRequestContextV2): ApiGatewayManagementApi => {
   const { domainName, stage } = requestContext;
 
@@ -19,7 +21,7 @@ const buildManagementApi = (requestContext: APIGatewayEventWebsocketRequestConte
 
   return new ApiGatewayManagementApi({
     apiVersion: '2018-11-29',
-    endpoint,
+    endpoint: !process.env.IS_OFFLINE ? endpoint : 'http://localhost:3001',
   });
 };
 
@@ -37,6 +39,8 @@ export const sendWSConnected = (event: APIGatewayProxyWebsocketEventV2): Promise
     ConnectionId: connectionId,
     Data: JSON.stringify(msgInfo),
   };
+
+  log.debug('@Send conneccted: ', params);
 
   return managementApi.postToConnection(params).promise();
 };
@@ -59,6 +63,8 @@ export const sendWSMessage = (
     ConnectionId: connectionId,
     Data: JSON.stringify(postData),
   };
+
+  log.debug('@Send message: ', params);
 
   return managementApi.postToConnection(params).promise();
 };
