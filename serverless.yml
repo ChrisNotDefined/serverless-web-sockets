@@ -21,6 +21,7 @@ provider:
         - 'arn:aws:execute-api:*:*:**/@connections/*'
 
 functions:
+  # HTTP Handlers
   hello:
     handler: src/functions/hello.handler
     events:
@@ -61,6 +62,19 @@ functions:
       - websocket:
           route: sendMessage
 
+  # Dynamo Stream Handlers
+  onConnectionsTable:
+    handler: src/functions/streams/onConnectionsTable.handler
+    dependsOn:
+      - ChatTable
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [ChatTable, StreamArn]
+          filterPatterns:
+            - eventName: [INSERT]
+
 plugins:
   - serverless-webpack
   - serverless-offline
@@ -92,3 +106,5 @@ resources:
             KeyType: 'HASH'
         BillingMode: PAY_PER_REQUEST
         TableName: chatIdTable
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES

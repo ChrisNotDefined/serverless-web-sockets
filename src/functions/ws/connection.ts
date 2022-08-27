@@ -7,7 +7,8 @@ import {
 import * as log from 'lambda-log';
 import { buildErrorResponse, successfullReponse } from '@src/util/lambdaResponses';
 import { addConnection, deleteConnection } from '@src/connections/dynamoClient';
-import { sendWSConnected } from '@src/connections/wsSender';
+
+log.options.debug = true;
 
 export const handler = async (
   event: APIGatewayProxyWebsocketEventV2,
@@ -15,6 +16,7 @@ export const handler = async (
   callback: APIGatewayProxyCallbackV2
 ) => {
   const requestEventType = event.requestContext.eventType;
+  // TODO: Find out if possible to send data in connection request
   log.debug('@@@ Event body', { event });
 
   if (requestEventType === 'CONNECT') {
@@ -32,9 +34,6 @@ const onConnected = async (event: APIGatewayProxyWebsocketEventV2): Promise<APIG
   try {
     log.debug('@@@ OnConnected');
     await addConnection(event.requestContext.connectionId);
-    // You cant send messages before the connection endpoint has responded
-    // TODO: Implement Dynamo Event or SQS Execution Queue
-    // await sendWSConnected(event);
     return successfullReponse;
   } catch (error) {
     log.error(error as Error, { msg: '@ Connect error' });
